@@ -1,5 +1,5 @@
 {
-  "name": "ts-express-templete",
+  "name": "jwt-auth-typescript-express",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
