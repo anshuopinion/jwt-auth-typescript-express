@@ -9,9 +9,10 @@ export const JWT_KEY = process.env.JWT_KEY!;
 export const FRONTEND_URL = process.env.FRONTEND_URL!;
 
 let testAccount = {
-  user: "zs4wt3dxbphlhl2v@ethereal.email",
-  pass: "k83X1QGR1M74sSwDwF",
+  user: "mupacauxp4mgw2mi@ethereal.email",
+  pass: "eQVNHXGY9NFcWYzMWB",
 };
+
 export let transporter = nodemailer.createTransport({
   host: "smtp.ethereal.email",
   port: 587,

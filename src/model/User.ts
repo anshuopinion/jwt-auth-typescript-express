@@ -5,7 +5,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   isUserVerified: boolean;
-  verifyToken: string;
+  verfiyToken: string;
 }
 
 const UserSchema: Schema = new Schema({
@@ -13,7 +13,7 @@ const UserSchema: Schema = new Schema({
   email: { type: String, unquie: true },
   password: { type: String },
   isUserVerified: { type: Boolean, default: false },
-  verifyToken: { type: String },
+  verfiyToken: { type: String },
 });
 
 export default model<IUser>("User", UserSchema);

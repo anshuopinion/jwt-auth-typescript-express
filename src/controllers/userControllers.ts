@@ -29,6 +29,8 @@ export const signinUser: RequestHandler = async (req, res, next) => {
   try {
     const user = await User.findOne({ email });
     if (!user) return next(createHttpError(404, "User not Found!"));
+    if (!user.isUserVerified)
+      return next(createHttpError(406, "User not Verified"));
 
     const isValidPassword = await bcrypt.compare(password, user.password);
 
@@ -55,110 +57,113 @@ export const signinUser: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const sendUserVerificationMail: RequestHandler = async (
-  req,
-  res,
-  next
-) => {
+export const sendVerificationMail: RequestHandler = async (req, res, next) => {
   const { email }: { email: string } = req.body;
-
   try {
     const user = await User.findOne({ email });
-
-    if (!user) return next(createHttpError(404, "Email Not Found"));
+    if (!user) return next(createHttpError(404, "Email Not Valid!"));
 
     if (user.isUserVerified)
-      return next(createHttpError(406, "Your Email is Already Verified"));
+      return next(createHttpError(406, "User already verified"));
 
-    const token = await bcrypt.hash(user._id.toString(), 8);
+    const encryptedToken = await bcrypt.hash(user._id.toString(), 8);
 
     const jwtToken = jwt.sign({ userId: user._id }, JWT_KEY, {
-      expiresIn: "15m",
+      expiresIn: "60m",
     });
-
-    await user.updateOne({ $set: { verifyToken: token } });
 
     let info = await transporter.sendMail({
-      from: '"dosomecoding 👻" <dosomecoding@example.com>', // sender address
+      from: '"Fred Foo 👻" <anshuraj@dosomecoding.com>', // sender address
       to: `${email}`, // list of receivers
-      subject: "Email Verifacation Link", // Subject line
+      subject: "For Email Verification", // Subject line
       // text: "Hello world?", // plain text body
-      html: `Click on Link to verify your email: <a href="${FRONTEND_URL}/send-email/${jwtToken}"> Link </a>`, // html body
+      html: `Your Verification Link <a href="${FRONTEND_URL}/email-verify/${jwtToken}">Link</a>`, // html body
     });
 
-    res.json({ message: `Preview URL: ${nodemailer.getTestMessageUrl(info)}` });
+    // console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+
+    await user.updateOne({ $set: { verifyToken: encryptedToken } });
+    res.json({
+      message: `Preview URL: %s ${nodemailer.getTestMessageUrl(info)}`,
+    });
   } catch (error) {
     return next(InternalServerError);
   }
 };
 
-export const emailVerify: RequestHandler = async (req, res, next) => {
+export const verifyUserMail: RequestHandler = async (req, res, next) => {
   const { token }: { token: string } = req.body;
-  try {
-    const decodedToken: any = jwt.decode(token);
-    const user = await User.findById(decodedToken.userId);
-    if (!user) return next(createHttpError(401, "Invalid Token"));
 
-    const isValid = await bcrypt.compare(decodedToken.userId, user.verifyToken);
-    if (!isValid) return next(createHttpError(401, "Invalid Token"));
+  try {
+    const decodedToken: any = jwt.verify(token, JWT_KEY);
+
+    const user = await User.findById(decodedToken.userId);
+    if (!user) return next(createHttpError(401, "Token Invalid"));
 
     await user.updateOne({
       $set: { isUserVerified: true },
       $unset: { verifyToken: 0 },
     });
-    res.json({ message: "Email Verfied" });
+
+    res.json({ message: "Email Verified!" });
   } catch (error) {
-    return next(InternalServerError);
+    return next(createHttpError(401, "Token Invalid"));
   }
 };
 
-export const forgotPassMail: RequestHandler = async (req, res, next) => {
+export const sendForgotPasswordMail: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
   const { email }: { email: string } = req.body;
-
   try {
     const user = await User.findOne({ email });
+    if (!user) return next(createHttpError(404, "Email Not Valid!"));
 
-    if (!user) return next(createHttpError(404, "Email Not Found"));
-
-    const token = await bcrypt.hash(user._id.toString(), 8);
+    const encryptedToken = await bcrypt.hash(user._id.toString(), 8);
 
     const jwtToken = jwt.sign({ userId: user._id }, JWT_KEY, {
-      expiresIn: "15m",
+      expiresIn: "60m",
     });
-
-    await user.updateOne({ $set: { verifyToken: token } });
 
     let info = await transporter.sendMail({
-      from: '"dosomecoding 👻" <dosomecoding@example.com>', // sender address
+      from: '"Fred Foo 👻" <anshuraj@dosomecoding.com>', // sender address
       to: `${email}`, // list of receivers
-      subject: "Email Verifacation Forgot Password Link", // Subject line
+      subject: "For Forgot Password Verification Mail", // Subject line
       // text: "Hello world?", // plain text body
-      html: `Click to change password: <a href="${FRONTEND_URL}/send-email/${jwtToken}"> Link </a>`, // html body
+      html: `Your Verification for forgot password Link <a href="${FRONTEND_URL}/forgot-password-verify/${jwtToken}">Link</a>`, // html body
     });
 
-    res.json({ message: `Preview URL: ${nodemailer.getTestMessageUrl(info)}` });
+    // console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+
+    await user.updateOne({ $set: { verifyToken: encryptedToken } });
+
+    res.json({
+      message: `Preview URL: %s ${nodemailer.getTestMessageUrl(info)}`,
+    });
   } catch (error) {
     return next(InternalServerError);
   }
 };
-
-export const changePassword: RequestHandler = async (req, res, next) => {
+export const verifyForgotMail: RequestHandler = async (req, res, next) => {
   const { token, password }: { token: string; password: string } = req.body;
+
   try {
-    const decodedToken: any = jwt.decode(token);
+    const decodedToken: any = jwt.verify(token, JWT_KEY);
+
     const user = await User.findById(decodedToken.userId);
-    if (!user) return next(createHttpError(401, "Invalid Token"));
+    if (!user) return next(createHttpError(401, "Token Invalid"));
 
-    const isValid = await bcrypt.compare(decodedToken.userId, user.verifyToken);
-    if (!isValid) return next(createHttpError(401, "Invalid Token"));
+    const encryptedPassword = await bcrypt.hash(password, 8);
 
-    const hashedPassword = await bcrypt.hash(password, 8);
     await user.updateOne({
-      $set: { password: hashedPassword },
+      $set: { password: encryptedPassword },
       $unset: { verifyToken: 0 },
     });
-    res.json({ message: "Password Changed" });
+
+    res.json({ message: "Password Changed!" });
   } catch (error) {
-    return next(createHttpError(401, "Invalid Token"));
+    return next(createHttpError(401, "Token Invalid"));
   }
 };
