@@ -1,6 +1,0 @@
-import { RequestHandler } from "express";
-import validator from "../utils/validator";
-import { {{camelCase name}}Schema } from "./{{camelCase name}}Validation";
-
-export const get{{pascalCase name}}ByIdValidation: RequestHandler = (req, res, next) =>
-  validator({{camelCase name}}Schema.get{{pascalCase name}}ById, req.body, next);
