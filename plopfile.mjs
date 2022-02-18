@@ -45,6 +45,18 @@ export default function (
         templateFile: "templates/route.hbs",
         skipIfExists: true,
       },
+      {
+        type: "append",
+        path: "src/app.ts",
+        pattern: "Routes_Generator",
+        templateFile: "templates/appRoutes.hbs",
+      },
+      {
+        type: "append",
+        path: "src/app.ts",
+        pattern: "Routes_Path_Generator",
+        templateFile: "templates/appRoutesPath.hbs",
+      },
     ], // array of actions
   });
 

@@ -1,6 +1,7 @@
 import express, { ErrorRequestHandler } from "express";
 import createHttpError from "http-errors";
-import exampleRoute from "./routes/exampleRoutes";
+// Routes_Path_Generator
+import productRoute from "./routes/productRoutes";
 import userRoute from "./routes/userRoutes";
 import mongoose from "mongoose";
 import { DB, PORT } from "./config";
@@ -16,8 +17,8 @@ app.use(cookieParser());
 
 app.use(passport.initialize());
 kPassport(passport);
-
-app.use("/", exampleRoute);
+// Routes_Generator
+app.use("/product", productRoute);
 app.use("/user", userRoute);
 
 app.use(() => {
