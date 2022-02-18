@@ -19,11 +19,31 @@ export default function (
         type: "add",
         path: "src/model/{{pascalCase name}}.ts",
         templateFile: "templates/model.hbs",
+        skipIfExists: true,
       },
       {
         type: "add",
         path: "src/controllers/{{camelCase name}}Controller.ts",
         templateFile: "templates/controller.hbs",
+        skipIfExists: true,
+      },
+      {
+        type: "add",
+        path: "src/validation/{{camelCase name}}Validation/{{camelCase name}}Validation.ts",
+        templateFile: "templates/validation.hbs",
+        skipIfExists: true,
+      },
+      {
+        type: "add",
+        path: "src/validation/{{camelCase name}}Validation/{{camelCase name}}Schema.ts",
+        templateFile: "templates/validationSchema.hbs",
+        skipIfExists: true,
+      },
+      {
+        type: "add",
+        path: "src/routes/{{camelCase name}}Routes.ts",
+        templateFile: "templates/route.hbs",
+        skipIfExists: true,
       },
     ], // array of actions
   });
