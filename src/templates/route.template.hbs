@@ -1,0 +1,11 @@
+import { Router } from "express";
+import { get{{pascalCase name}}ById } from "../controllers/{{camelCase name}}Controller";
+import { authChecker } from "../middleware/authChecker";
+import { get{{pascalCase name}}ByIdValidation } from "../validation/{{camelCase name}}Validation/{{camelCase name}}Schema";
+
+const router = Router();
+
+router.post("/", authChecker, get{{pascalCase name}}ByIdValidation,get{{pascalCase name}}ById);
+
+
+export default router;
