@@ -1,6 +1,8 @@
 import express, { ErrorRequestHandler } from "express";
 import createHttpError from "http-errors";
 // Routes_Path_Generator
+import bookRoute from "./routes/bookRoutes";
+import orderRoute from "./routes/orderRoutes";
 import productRoute from "./routes/productRoutes";
 import userRoute from "./routes/userRoutes";
 import mongoose from "mongoose";
@@ -18,6 +20,8 @@ app.use(cookieParser());
 app.use(passport.initialize());
 kPassport(passport);
 // Routes_Generator
+app.use("/book", bookRoute);
+app.use("/order", orderRoute);
 app.use("/product", productRoute);
 app.use("/user", userRoute);
 
